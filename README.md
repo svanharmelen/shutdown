@@ -2,16 +2,19 @@
 
 shutdown can be used to gracefully exit (part of) a running program
 
+[![Build Status][travis-badge]][travis-url]
 [![Crates.io][crates-badge]][crates-url]
 [![Documentation][docs-badge]][docs-url]
 [![License][license-badge]][license-url]
 
+[travis-badge]: https://travis-ci.org/svanharmelen/shutdown.svg
+[travis-url]: https://travis-ci.org/svanharmelen/shutdown
 [crates-badge]: https://img.shields.io/crates/v/shutdown.svg
 [crates-url]: https://crates.io/crates/shutdown
 [docs-badge]: https://docs.rs/shutdown/badge.svg
 [docs-url]: https://docs.rs/shutdown
 [license-badge]: https://img.shields.io/crates/l/shutdown.svg
-[license-url]: https://github.com/risoflora/shutdown#license
+[license-url]: https://github.com/svanharmelen/shutdown#license
 
 ## Example
 

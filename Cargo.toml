@@ -1,9 +1,12 @@
 [package]
 name = "shutdown"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Sander van Harmelen <sander@vanharmelen.nl>"]
 edition = "2018"
 description = "shutdown can be used to gracefully exit (part of) a running program"
+documentation = "https://docs.rs/shutdown/"
+homepage = "https://github.com/svanharmelen/shutdown"
+repository = "https://github.com/svanharmelen/shutdown"
 license = "MIT OR Apache-2.0"
 readme = "README.md"
 
