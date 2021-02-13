@@ -1,0 +1,43 @@
+name: Test and Build
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test_and_build:
+    name: Test and Build - ${{ matrix.toolchain }}
+    strategy:
+      matrix:
+        toolchain: [nightly, stable]
+        platform: [ubuntu-latest]
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.toolchain }}
+          components: rustfmt, clippy
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Test package
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: -- --test-threads=1
+
+      - name: Build docs
+        uses: actions-rs/cargo@v1
+        with:
+          command: doc
+          args: --verbose
+
+      - name: Build package
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --verbose

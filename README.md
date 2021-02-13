@@ -2,13 +2,13 @@
 
 shutdown can be used to gracefully exit (part of) a running program
 
-[![Build Status][travis-badge]][travis-url]
+[![Build Status][gh-actions-badge]][gh-actions-url]
 [![Crates.io][crates-badge]][crates-url]
 [![Documentation][docs-badge]][docs-url]
 [![License][license-badge]][license-url]
 
-[travis-badge]: https://travis-ci.org/svanharmelen/shutdown.svg
-[travis-url]: https://travis-ci.org/svanharmelen/shutdown
+[gh-actions-badge]: https://github.com/svanharmelen/shutdown/workflows/Test%20and%20Build/badge.svg
+[gh-actions-url]: https://github.com/svanharmelen/shutdown/actions?workflow=Test%20and%20Build
 [crates-badge]: https://img.shields.io/crates/v/shutdown.svg
 [crates-url]: https://crates.io/crates/shutdown
 [docs-badge]: https://docs.rs/shutdown/badge.svg
