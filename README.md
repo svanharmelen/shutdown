@@ -46,14 +46,14 @@ Add shutdown and Tokio to your dependencies:
 
 ```toml
 shutdown = "0.1"
-tokio = { version = "0.2", features = ["full"] }
+tokio = { version = "1", features = ["full"] }
 ```
 
 And then get started in your `main.rs`:
 
 ```rust
 use shutdown::Shutdown;
-use tokio::time::{delay_for, Duration};
+use tokio::time::{sleep, Duration};
 
 #[tokio::main]
 async fn main() {
@@ -63,7 +63,7 @@ async fn main() {
         // Wait for a second before spawning a new task
         tokio::select! {
             _ = root.recv() => break,
-            _ = delay_for(Duration::from_secs(1)) => (),
+            _ = sleep(Duration::from_secs(1)) => (),
         }
 
         // Subscribe and spawn a long running task

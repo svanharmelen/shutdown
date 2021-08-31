@@ -214,7 +214,7 @@ impl Shutdown {
     ///
     /// ```no_run
     /// use shutdown::Shutdown;
-    /// use tokio::time::{delay_for, Duration};
+    /// use tokio::time::{sleep, Duration};
     ///
     /// #[tokio::main]
     /// async fn main() {
@@ -222,7 +222,7 @@ impl Shutdown {
     ///
     ///     tokio::select! {
     ///         _ = root.recv() => (),
-    ///         _ = delay_for(Duration::from_secs(300)) => (), // Long runnnig task
+    ///         _ = sleep(Duration::from_secs(300)) => (), // Long runnnig task
     ///     }
     /// }
     /// ```
@@ -246,7 +246,7 @@ mod tests {
     use super::*;
 
     use libc;
-    use tokio::time::{delay_for, Duration};
+    use tokio::time::{sleep, Duration};
 
     #[tokio::test]
     async fn not_notified() {
@@ -264,7 +264,7 @@ mod tests {
 
         tokio::select! {
             _ = root.recv() => (),
-            _ = delay_for(Duration::from_secs(1)) => (),
+            _ = sleep(Duration::from_secs(1)) => (),
         }
 
         assert!(!root.is_shutdown(), "root shutdown without notify");
@@ -292,15 +292,15 @@ mod tests {
 
         tokio::select! {
             _ = root.recv() => (),
-            _ = delay_for(Duration::from_secs(1)) => (),
+            _ = sleep(Duration::from_secs(1)) => (),
         }
         tokio::select! {
             _ = sub1.recv() => (),
-            _ = delay_for(Duration::from_secs(1)) => (),
+            _ = sleep(Duration::from_secs(1)) => (),
         }
         tokio::select! {
             _ = sub2.recv() => (),
-            _ = delay_for(Duration::from_secs(1)) => (),
+            _ = sleep(Duration::from_secs(1)) => (),
         }
 
         assert!(root.is_shutdown(), "root not shutdown (signal)");
@@ -322,15 +322,15 @@ mod tests {
 
         tokio::select! {
             _ = root.recv() => (),
-            _ = delay_for(Duration::from_secs(1)) => (),
+            _ = sleep(Duration::from_secs(1)) => (),
         }
         tokio::select! {
             _ = sub1.recv() => (),
-            _ = delay_for(Duration::from_secs(1)) => (),
+            _ = sleep(Duration::from_secs(1)) => (),
         }
         tokio::select! {
             _ = sub2.recv() => (),
-            _ = delay_for(Duration::from_secs(1)) => (),
+            _ = sleep(Duration::from_secs(1)) => (),
         }
 
         assert!(root.is_shutdown(), "root not shutdown (now)");
@@ -352,15 +352,15 @@ mod tests {
 
         tokio::select! {
             _ = root.recv() => (),
-            _ = delay_for(Duration::from_secs(1)) => (),
+            _ = sleep(Duration::from_secs(1)) => (),
         }
         tokio::select! {
             _ = sub1.recv() => (),
-            _ = delay_for(Duration::from_secs(1)) => (),
+            _ = sleep(Duration::from_secs(1)) => (),
         }
         tokio::select! {
             _ = sub2.recv() => (),
-            _ = delay_for(Duration::from_secs(1)) => (),
+            _ = sleep(Duration::from_secs(1)) => (),
         }
 
         assert!(!root.is_shutdown(), "root shutdown without notify");
