@@ -45,7 +45,7 @@ fn main() {
 Add shutdown and Tokio to your dependencies:
 
 ```toml
-shutdown = "0.1"
+shutdown = "0.2"
 tokio = { version = "1", features = ["full"] }
 ```
 

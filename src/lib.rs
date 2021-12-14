@@ -34,6 +34,12 @@ pub struct Shutdown {
     notify: Receiver,
 }
 
+impl Clone for Shutdown {
+    fn clone(&self) -> Self {
+        self.subscribe()
+    }
+}
+
 impl Shutdown {
     /// Create a new shutdown channel. In most cases the channel will be
     /// shutdown when CTRL-C is pressed and the process receives a SIGINT or
@@ -245,7 +251,6 @@ impl Shutdown {
 mod tests {
     use super::*;
 
-    use libc;
     use tokio::time::{sleep, Duration};
 
     #[tokio::test]
