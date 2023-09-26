@@ -26,6 +26,7 @@ use signal_hook::{
 use signal_hook_tokio::Signals;
 use tokio_util::sync::CancellationToken;
 
+#[derive(Debug)]
 pub struct Shutdown {
     token: CancellationToken,
 }
