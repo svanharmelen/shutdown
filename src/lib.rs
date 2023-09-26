@@ -30,6 +30,12 @@ pub struct Shutdown {
     token: CancellationToken,
 }
 
+impl Clone for Shutdown {
+    fn clone(&self) -> Self {
+        self.subscribe()
+    }
+}
+
 impl Shutdown {
     /// Create a new shutdown signal. In most cases the signal will be
     /// triggered when CTRL-C is pressed and the process receives a SIGINT or
