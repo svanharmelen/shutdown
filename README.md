@@ -18,8 +18,8 @@ shutdown can be used to gracefully exit (part of) a running program
 
 ## Example
 
-The example below shows how to create a new shutdown channel, create a few
-branches, subscribe some listeners and shutdown one of the branches:
+The example below shows how to create a new shutdown signal, create a few
+branches, subscribe some listeners and signal one of the branches:
 
 ```rust
 use shutdown::Shutdown;
@@ -35,8 +35,8 @@ fn main() {
     let subscriber1 = branch1.subscribe();
     let subscriber2 = branch1.subscribe();
 
-    // Shutdown the first branch.
-    branch1.shutdown();
+    // Signal the first branch.
+    branch1.signal();
 }
 ```
 
@@ -45,7 +45,7 @@ fn main() {
 Add shutdown and Tokio to your dependencies:
 
 ```toml
-shutdown = "0.2"
+shutdown = "0.3"
 tokio = { version = "1", features = ["full"] }
 ```
 
@@ -59,17 +59,19 @@ use tokio::time::{sleep, Duration};
 async fn main() {
     let mut root = Shutdown::new().unwrap();
 
-    while !root.is_shutdown() {
-        // Wait for a second before spawning a new task
+    while !root.is_signalled() {
+        // Wait for a task to finish while also
+        // listening for any shutdown signals.
         tokio::select! {
-            _ = root.recv() => break,
-            _ = sleep(Duration::from_secs(1)) => (),
+            _ = sleep(Duration::from_secs(30)) => (),
+            _ = root.received() => break,
         }
 
-        // Subscribe and spawn a long running task
+        // Subscribe and spawn a long running task which will
+        // end its loop when a shutdown signal is received.
         let shutdown = root.subscribe();
         tokio::spawn(async move {
-            while !shutdown.is_shutdown() {
+            while !shutdown.is_signalled() {
                 // Do stuff until we're shutdown...
             }
         })
@@ -79,7 +81,7 @@ async fn main() {
 
 ## Running the tests
 
-Because each "root" shutdown channel registers itself to listen for SIGINT and
+Because each "root" shutdown signal registers itself to listen for SIGINT and
 SIGTERM signals, the test need to run one by one. So to run the tests, please
 execute:
 
