@@ -3,7 +3,7 @@
 //! This crate is meant to be used together with Tokio as it provides an
 //! async solution for listening and forwarding shutdown signals.
 //!
-//! When creating a new "root" shutdown signal, it will register itself to
+//! When creating a new "root" shutdown object, it will register itself to
 //! listen for SIGINT and SIGTERM signals. When a SIGNINT or SIGTERM is received,
 //! it will unregister itself again so any additional signals will be processed
 //! as usual (interrupting or terminating the process in most cases). Besides a
@@ -13,7 +13,7 @@
 //! You can form a tree of branches and subscribers and choose to only shutdown
 //! a specific branch. This will shutdown all subscribers but also any child
 //! branches and their subscribers. This can be helpful in async applications
-//! where lots of tasks spawn lots of tasks, that spawn lots of tasks...
+//! where lots of tasks spawn lots of tasks that spawn lots of tasks...
 
 use std::sync::{atomic::AtomicBool, Arc};
 
@@ -28,6 +28,7 @@ use tokio_util::sync::CancellationToken;
 
 #[derive(Debug)]
 pub struct Shutdown {
+    registered: bool,
     token: CancellationToken,
 }
 
@@ -38,10 +39,10 @@ impl Clone for Shutdown {
 }
 
 impl Shutdown {
-    /// Create a new shutdown signal. In most cases the signal will be
-    /// triggered when CTRL-C is pressed and the process receives a SIGINT or
-    /// SIGTERM signal. If needed you can also call [signal](Shutdown::signal)
-    /// to send a shutdown signal programmatically.
+    /// Create a new shutdown object with registered shutdown signals. In most
+    /// cases the signal will be triggered when CTRL-C is pressed and the
+    /// process receives a SIGINT or SIGTERM signal. If needed you can also call
+    /// [signal](Shutdown::signal) to send a shutdown signal programmatically.
     ///
     /// # Examples
     ///
@@ -51,16 +52,52 @@ impl Shutdown {
     /// let root = Shutdown::new().unwrap();
     /// ```
     pub fn new() -> Result<Self, std::io::Error> {
-        // Create a cancellation token.
-        let token = CancellationToken::new();
+        // Create a new shutdown object.
+        let mut shutdown = Shutdown::unregistered();
 
-        // Create a new shutdown signal.
-        let shutdown = Self {
-            token: token.clone(),
-        };
+        // Register the shutdown signals.
+        shutdown.register_signals()?;
+
+        Ok(shutdown)
+    }
+
+    /// Create a new shutdown object **without** registering shutdown signals.
+    /// This can be useful if you want to create a shutdown object that is not
+    /// listening for process signals but needs to be signalled by calling
+    /// [signal](Shutdown::signal) programmatically.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use shutdown::Shutdown;
+    ///
+    /// let root = Shutdown::unregistered();
+    ///
+    /// // Do stuff...
+    ///
+    /// // Manually signal a shutdown.
+    /// root.signal();
+    /// ```
+    pub fn unregistered() -> Self {
+        Self {
+            registered: false,
+            token: CancellationToken::new(),
+        }
+    }
+
+    /// Register shutdown signals. This will listen for SIGINT and SIGTERM
+    /// signals and trigger a shutdown signal when received. It is safe to call
+    /// this method multiple times but it will only register the signals once.
+    pub fn register_signals(&mut self) -> Result<(), std::io::Error> {
+        // Register the shutdown signals only once.
+        if self.registered {
+            return Ok(());
+        }
 
         // Register the SIGINT and SIGTERM signals.
         let mut signals = Signals::new([SIGINT, SIGTERM])?;
+
+        let token = self.token.clone();
 
         // Spawn a Tokio task that will listen for signals.
         tokio::spawn(async move {
@@ -77,7 +114,10 @@ impl Shutdown {
             }
         });
 
-        Ok(shutdown)
+        // Mark the shutdown object as registered.
+        self.registered = true;
+
+        Ok(())
     }
 
     /// Create a new branch (child) that can be signalled independent of the
@@ -97,6 +137,7 @@ impl Shutdown {
     /// ```
     pub fn branch(&self) -> Self {
         Self {
+            registered: self.registered,
             token: self.token.child_token(),
         }
     }
@@ -114,6 +155,7 @@ impl Shutdown {
     /// ```
     pub fn subscribe(&self) -> Self {
         Self {
+            registered: self.registered,
             token: self.token.clone(),
         }
     }

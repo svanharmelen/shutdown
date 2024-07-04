@@ -18,7 +18,7 @@ shutdown can be used to gracefully exit (part of) a running program
 
 ## Example
 
-The example below shows how to create a new shutdown signal, create a few
+The example below shows how to create a new shutdown object, create a few
 branches, subscribe some listeners and signal one of the branches:
 
 ```rust
@@ -45,8 +45,8 @@ fn main() {
 Add shutdown and Tokio to your dependencies:
 
 ```toml
-shutdown = "0.3"
-tokio = { version = "1", features = ["full"] }
+shutdown = "0.4"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 ```
 
 And then get started in your `main.rs`:
@@ -81,7 +81,7 @@ async fn main() {
 
 ## Running the tests
 
-Because each "root" shutdown signal registers itself to listen for SIGINT and
+Because each "root" shutdown object registers itself to listen for SIGINT and
 SIGTERM signals, the test need to run one by one. So to run the tests, please
 execute:
 
