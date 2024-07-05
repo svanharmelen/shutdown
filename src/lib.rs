@@ -15,7 +15,10 @@
 //! branches and their subscribers. This can be helpful in async applications
 //! where lots of tasks spawn lots of tasks that spawn lots of tasks...
 
-use std::sync::{atomic::AtomicBool, Arc};
+use std::sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+};
 
 use futures::stream::StreamExt;
 use log::debug;
@@ -28,7 +31,7 @@ use tokio_util::sync::CancellationToken;
 
 #[derive(Debug)]
 pub struct Shutdown {
-    registered: bool,
+    registered: Arc<AtomicBool>,
     token: CancellationToken,
 }
 
@@ -80,7 +83,7 @@ impl Shutdown {
     /// ```
     pub fn unregistered() -> Self {
         Self {
-            registered: false,
+            registered: Arc::default(),
             token: CancellationToken::new(),
         }
     }
@@ -90,7 +93,7 @@ impl Shutdown {
     /// this method multiple times but it will only register the signals once.
     pub fn register_signals(&mut self) -> Result<(), std::io::Error> {
         // Register the shutdown signals only once.
-        if self.registered {
+        if self.registered.load(Ordering::SeqCst) {
             return Ok(());
         }
 
@@ -115,7 +118,7 @@ impl Shutdown {
         });
 
         // Mark the shutdown object as registered.
-        self.registered = true;
+        self.registered.store(true, Ordering::SeqCst);
 
         Ok(())
     }
@@ -137,7 +140,7 @@ impl Shutdown {
     /// ```
     pub fn branch(&self) -> Self {
         Self {
-            registered: self.registered,
+            registered: self.registered.clone(),
             token: self.token.child_token(),
         }
     }
@@ -155,7 +158,7 @@ impl Shutdown {
     /// ```
     pub fn subscribe(&self) -> Self {
         Self {
-            registered: self.registered,
+            registered: self.registered.clone(),
             token: self.token.clone(),
         }
     }
