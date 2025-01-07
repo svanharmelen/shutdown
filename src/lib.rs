@@ -163,6 +163,17 @@ impl Shutdown {
         }
     }
 
+    /// Converts this `Shutdown` into a `CancellationToken`.
+    ///
+    /// The token will be cancelled whenever this `Shutdown` would have been
+    /// cancelled. Calling `.cancel()` on the returned token is equivalent to
+    /// calling `.signal()` on any clones of this `Shutdown`. In other words,
+    /// the returned token behaves just like any other clone of this
+    /// `Shutdown`.
+    pub fn into_token(self) -> CancellationToken {
+        self.token
+    }
+
     /// Returns `true` if a shutdown signal has been received.
     ///
     /// # Examples
@@ -220,6 +231,12 @@ impl Shutdown {
     /// ```
     pub async fn signalled(&self) {
         self.token.cancelled().await;
+    }
+}
+
+impl From<Shutdown> for CancellationToken {
+    fn from(value: Shutdown) -> Self {
+        value.into_token()
     }
 }
 
@@ -350,5 +367,25 @@ mod tests {
 
         assert!(branch2.is_signalled(), "branch2 not shutdown (manual)");
         assert!(sub2.is_signalled(), "subscriber2 not shutdown (manual)");
+    }
+
+    #[tokio::test]
+    async fn shutdown_signal_via_token_cancel() {
+        let shutdown = Shutdown::new().unwrap();
+
+        let token = shutdown.clone().into_token();
+        token.cancel();
+
+        assert!(shutdown.is_signalled(), "shutdown not signalled via token.cancel()");
+    }
+
+    #[tokio::test]
+    async fn shutdown_token_cancel_via_signal() {
+        let shutdown = Shutdown::new().unwrap();
+
+        let token = shutdown.clone().into_token();
+        shutdown.signal();
+
+        assert!(token.is_cancelled(), "token not cancelled via shutdown.signal()");
     }
 }
