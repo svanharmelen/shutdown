@@ -1,6 +1,6 @@
 [package]
 name = "shutdown"
-version = "0.4.1"
+version = "0.5.0"
 authors = ["Sander van Harmelen <sander@vanharmelen.nl>"]
 edition = "2021"
 description = "shutdown can be used to gracefully exit (part of) a running program"
